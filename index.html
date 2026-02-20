@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recipeé — Find Your Next Meal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cream: #fdf6ec;
+      --warm-white: #fffcf7;
+      --ink: #1a1207;
+      --brown: #7c4f2a;
+      --terracotta: #c96a3a;
+      --sage: #6b8068;
+      --gold: #d4a847;
+      --light-brown: #e8d5c0;
+      --card-bg: #fff9f2;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--ink);
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--cream);
+      letter-spacing: -0.02em;
+    }
+    header h1 span { color: var(--gold); font-style: italic; }
+    header p { color: #a08c73; font-size: 0.85rem; font-weight: 300; }
+
+    /* SEARCH */
+    .search-section {
+      background: var(--terracotta);
+      padding: 3rem 2rem;
+      text-align: center;
+    }
+    .search-section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      color: var(--warm-white);
+      margin-bottom: 0.5rem;
+    }
+    .search-section p { color: rgba(255,255,255,0.75); margin-bottom: 1.5rem; font-size: 0.95rem; }
+    .search-bar {
+      display: flex;
+      max-width: 540px;
+      margin: 0 auto;
+      background: var(--warm-white);
+      border-radius: 50px;
+      overflow: hidden;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    }
+    .search-bar input {
+      flex: 1;
+      border: none;
+      padding: 1rem 1.5rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      background: transparent;
+      color: var(--ink);
+      outline: none;
+    }
+    .search-bar button {
+      background: var(--ink);
+      color: var(--cream);
+      border: none;
+      padding: 0 1.8rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .search-bar button:hover { background: var(--brown); }
+
+    /* CATEGORIES */
+    .categories {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 1.5rem 2rem;
+      background: var(--ink);
+    }
+    .cat-btn {
+      background: transparent;
+      border: 1.5px solid #5a4030;
+      color: #c4a882;
+      padding: 0.45rem 1.1rem;
+      border-radius: 50px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .cat-btn:hover, .cat-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: var(--ink);
+    }
+
+    /* GRID */
+    .recipes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+      padding: 2.5rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* CARD */
+    .recipe-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s, box-shadow 0.25s;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+      border: 1px solid var(--light-brown);
+      animation: fadeUp 0.4s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .recipe-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,0,0,0.13); }
+    .card-emoji {
+      height: 160px;
+      background: linear-gradient(135deg, var(--light-brown), #f0dcc8);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 5rem;
+    }
+    .card-body { padding: 1.2rem; }
+    .card-meta {
+      display: flex; gap: 0.5rem; margin-bottom: 0.7rem; flex-wrap: wrap;
+    }
+    .tag {
+      background: var(--terracotta);
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .tag.green { background: var(--sage); }
+    .tag.gold  { background: var(--gold); color: var(--ink); }
+    .card-body h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      margin-bottom: 0.4rem;
+      line-height: 1.3;
+    }
+    .card-body p { font-size: 0.85rem; color: #7a6048; line-height: 1.5; }
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 1.2rem;
+      border-top: 1px solid var(--light-brown);
+      font-size: 0.82rem;
+      color: #9a7a55;
+    }
+    .card-footer span { display: flex; align-items: center; gap: 0.3rem; }
+
+    /* NO RESULTS */
+    .no-results {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: #9a7a55;
+      grid-column: 1/-1;
+    }
+    .no-results p { font-size: 3rem; margin-bottom: 1rem; }
+
+    /* MODAL */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(26,18,7,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--warm-white);
+      border-radius: 20px;
+      max-width: 680px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalIn 0.3s ease;
+      position: relative;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.93) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-hero {
+      height: 180px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 6rem;
+      background: linear-gradient(135deg, var(--light-brown), #f0dcc8);
+      border-radius: 20px 20px 0 0;
+    }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: var(--ink); color: var(--cream);
+      border: none; border-radius: 50%;
+      width: 36px; height: 36px;
+      font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-body { padding: 1.8rem; }
+    .modal-body h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.9rem;
+      margin-bottom: 0.4rem;
+    }
+    .modal-desc { color: #7a6048; margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.95rem; }
+    .modal-stats {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      margin-bottom: 1.8rem;
+    }
+    .stat {
+      background: var(--cream);
+      border: 1px solid var(--light-brown);
+      border-radius: 12px;
+      padding: 0.7rem 1.1rem;
+      text-align: center;
+      flex: 1; min-width: 80px;
+    }
+    .stat-val { font-size: 1.3rem; font-weight: 700; color: var(--terracotta); display: block; }
+    .stat-lbl { font-size: 0.72rem; color: #9a7a55; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: var(--brown);
+      border-bottom: 2px solid var(--light-brown);
+      padding-bottom: 0.4rem;
+    }
+    .ingredients-list { list-style: none; margin-bottom: 1.8rem; }
+    .ingredients-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.6rem 0;
+      border-bottom: 1px dashed var(--light-brown);
+      font-size: 0.92rem;
+    }
+    .ingredients-list li:last-child { border: none; }
+    .ing-name { color: var(--ink); }
+    .ing-qty {
+      background: var(--terracotta);
+      color: white;
+      padding: 0.2rem 0.7rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    .steps-list { list-style: none; }
+    .steps-list li {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      align-items: flex-start;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: #4a3520;
+    }
+    .step-num {
+      background: var(--ink);
+      color: var(--gold);
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 600px) {
+      header h1 { font-size: 1.5rem; }
+      .search-section h2 { font-size: 1.5rem; }
+      .modal-body h2 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Recipe<span>é</span></h1>
+    <p>Your personal recipe companion</p>
+  </div>
+</header>
+
+<section class="search-section">
+  <h2>What are you craving today?</h2>
+  <p>Search from our collection of delicious recipes</p>
+  <div class="search-bar">
+    <input type="text" id="searchInput" placeholder="Search recipes, ingredients…" oninput="filterRecipes()" />
+    <button onclick="filterRecipes()">Search</button>
+  </div>
+</section>
+
+<div class="categories">
+  <button class="cat-btn active" onclick="setCategory('all', this)">🍽️ All</button>
+  <button class="cat-btn" onclick="setCategory('breakfast', this)">🌅 Breakfast</button>
+  <button class="cat-btn" onclick="setCategory('lunch', this)">🥗 Lunch</button>
+  <button class="cat-btn" onclick="setCategory('dinner', this)">🍽️ Dinner</button>
+  <button class="cat-btn" onclick="setCategory('dessert', this)">🍰 Dessert</button>
+  <button class="cat-btn" onclick="setCategory('vegetarian', this)">🥦 Vegetarian</button>
+</div>
+
+<div class="recipes-grid" id="recipesGrid"></div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modalBox">
+    <button class="modal-close" onclick="closeModalBtn()">✕</button>
+    <div class="modal-hero" id="modalEmoji"></div>
+    <div class="modal-body">
+      <h2 id="modalTitle"></h2>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="modal-stats" id="modalStats"></div>
+      <h3 class="section-title">🛒 Ingredients</h3>
+      <ul class="ingredients-list" id="modalIngredients"></ul>
+      <h3 class="section-title">👨‍🍳 Instructions</h3>
+      <ol class="steps-list" id="modalSteps"></ol>
+    </div>
+  </div>
+</div>
+
+<script>
+const RECIPES = [
+  {
+    id:1, emoji:"🥞", name:"Classic Buttermilk Pancakes",
+    category:"breakfast", tags:["Quick","Vegetarian"],
+    desc:"Fluffy, golden pancakes with a hint of vanilla — perfect weekend morning fuel.",
+    time:"20 min", servings:4, difficulty:"Easy", calories:310,
+    ingredients:[
+      {name:"All-purpose flour", qty:"1½ cups"},
+      {name:"Buttermilk", qty:"1¼ cups"},
+      {name:"Eggs", qty:"2 large"},
+      {name:"Unsalted butter", qty:"3 tbsp, melted"},
+      {name:"Sugar", qty:"2 tbsp"},
+      {name:"Baking powder", qty:"1 tsp"},
+      {name:"Baking soda", qty:"½ tsp"},
+      {name:"Salt", qty:"¼ tsp"},
+      {name:"Vanilla extract", qty:"1 tsp"},
+    ],
+    steps:[
+      "Whisk flour, sugar, baking powder, baking soda, and salt in a large bowl.",
+      "In a separate bowl, whisk buttermilk, eggs, melted butter, and vanilla extract.",
+      "Pour wet ingredients into dry ingredients and stir gently — lumps are fine, don't over-mix.",
+      "Heat a non-stick skillet or griddle over medium heat and lightly grease.",
+      "Pour ¼ cup of batter per pancake. Cook until bubbles form on the surface (about 2 min), then flip.",
+      "Cook the other side for 1–2 minutes until golden. Serve immediately with maple syrup.",
+    ]
+  },
+  {
+    id:2, emoji:"🍝", name:"Spaghetti Carbonara",
+    category:"dinner", tags:["Italian","Classic"],
+    desc:"A Roman staple of silky egg-and-cheese sauce with crispy guanciale — no cream needed.",
+    time:"25 min", servings:2, difficulty:"Medium", calories:620,
+    ingredients:[
+      {name:"Spaghetti", qty:"200 g"},
+      {name:"Guanciale (or pancetta)", qty:"150 g"},
+      {name:"Egg yolks", qty:"4"},
+      {name:"Whole egg", qty:"1"},
+      {name:"Pecorino Romano, grated", qty:"80 g"},
+      {name:"Black pepper", qty:"2 tsp, freshly cracked"},
+      {name:"Salt", qty:"to taste"},
+    ],
+    steps:[
+      "Cook spaghetti in well-salted boiling water until al dente. Reserve 1 cup of pasta water.",
+      "Meanwhile, cook guanciale in a pan over medium heat until crispy. Remove from heat.",
+      "Whisk egg yolks, whole egg, and grated Pecorino in a bowl. Season with black pepper.",
+      "Add the hot drained pasta to the guanciale pan (off heat). Toss to coat.",
+      "Add egg mixture and a splash of pasta water. Toss quickly to create a creamy sauce.",
+      "Add more pasta water as needed for consistency. Serve immediately with extra Pecorino.",
+    ]
+  },
+  {
+    id:3, emoji:"🥗", name:"Greek Quinoa Salad",
+    category:"lunch", tags:["Healthy","Vegetarian"],
+    desc:"Bright, crunchy and satisfying — a Mediterranean-inspired grain bowl packed with flavor.",
+    time:"15 min", servings:3, difficulty:"Easy", calories:280,
+    ingredients:[
+      {name:"Cooked quinoa", qty:"2 cups"},
+      {name:"Cherry tomatoes, halved", qty:"1 cup"},
+      {name:"Cucumber, diced", qty:"1 medium"},
+      {name:"Kalamata olives", qty:"½ cup"},
+      {name:"Red onion, thinly sliced", qty:"¼ cup"},
+      {name:"Feta cheese, crumbled", qty:"100 g"},
+      {name:"Olive oil", qty:"3 tbsp"},
+      {name:"Lemon juice", qty:"2 tbsp"},
+      {name:"Dried oregano", qty:"1 tsp"},
+      {name:"Salt & pepper", qty:"to taste"},
+    ],
+    steps:[
+      "In a large bowl, combine cooked and cooled quinoa, tomatoes, cucumber, olives, and red onion.",
+      "Whisk together olive oil, lemon juice, oregano, salt, and pepper to make the dressing.",
+      "Pour the dressing over the salad and toss well to coat everything evenly.",
+      "Top with crumbled feta cheese.",
+      "Refrigerate for 10 minutes before serving for best flavor.",
+    ]
+  },
+  {
+    id:4, emoji:"🍰", name:"Classic New York Cheesecake",
+    category:"dessert", tags:["Baked","American"],
+    desc:"Dense, creamy, and lusciously smooth — the definitive New York style cheesecake.",
+    time:"90 min + chill", servings:10, difficulty:"Hard", calories:450,
+    ingredients:[
+      {name:"Cream cheese", qty:"900 g (softened)"},
+      {name:"Granulated sugar", qty:"1½ cups"},
+      {name:"Eggs", qty:"4 large"},
+      {name:"Sour cream", qty:"1 cup"},
+      {name:"Heavy cream", qty:"¼ cup"},
+      {name:"Vanilla extract", qty:"2 tsp"},
+      {name:"Graham crackers, crushed", qty:"200 g"},
+      {name:"Butter, melted", qty:"90 g"},
+    ],
+    steps:[
+      "Preheat oven to 160°C (325°F). Mix crushed crackers with melted butter and press into a 9-inch springform pan.",
+      "Beat cream cheese and sugar until smooth and fluffy — about 4 minutes.",
+      "Add eggs one at a time, beating on low after each addition.",
+      "Mix in sour cream, heavy cream, and vanilla until just combined.",
+      "Pour filling over crust. Tap pan to remove air bubbles.",
+      "Bake in a water bath for 70–80 minutes until the edges are set but center jiggles slightly.",
+      "Turn off oven, crack door, and let cheesecake cool inside for 1 hour. Refrigerate overnight.",
+    ]
+  },
+  {
+    id:5, emoji:"🍛", name:"Chicken Tikka Masala",
+    category:"dinner", tags:["Indian","Spicy"],
+    desc:"Tender chicken in a rich, aromatic tomato-cream sauce with warming spices.",
+    time:"45 min", servings:4, difficulty:"Medium", calories:520,
+    ingredients:[
+      {name:"Chicken breast, cubed", qty:"700 g"},
+      {name:"Plain yogurt", qty:"½ cup"},
+      {name:"Garlic cloves, minced", qty:"4"},
+      {name:"Fresh ginger, grated", qty:"1 tbsp"},
+      {name:"Garam masala", qty:"2 tsp"},
+      {name:"Cumin", qty:"1 tsp"},
+      {name:"Turmeric", qty:"½ tsp"},
+      {name:"Crushed tomatoes", qty:"400 g can"},
+      {name:"Heavy cream", qty:"½ cup"},
+      {name:"Butter", qty:"2 tbsp"},
+      {name:"Salt", qty:"to taste"},
+    ],
+    steps:[
+      "Marinate chicken in yogurt, half the garlic, ginger, garam masala, cumin, and turmeric for at least 30 min.",
+      "Grill or pan-sear chicken until slightly charred. Set aside.",
+      "In the same pan, melt butter and sauté remaining garlic for 1 minute.",
+      "Add crushed tomatoes and cook for 10 minutes, stirring occasionally.",
+      "Stir in heavy cream and the remaining spices. Simmer 5 minutes.",
+      "Add the chicken pieces into the sauce and simmer for another 10 minutes.",
+      "Garnish with fresh cilantro and serve with basmati rice or naan.",
+    ]
+  },
+  {
+    id:6, emoji:"🥑", name:"Avocado Toast with Poached Egg",
+    category:"breakfast", tags:["Healthy","Quick"],
+    desc:"Creamy avocado on sourdough topped with a perfectly runny poached egg.",
+    time:"12 min", servings:1, difficulty:"Easy", calories:390,
+    ingredients:[
+      {name:"Sourdough bread", qty:"2 thick slices"},
+      {name:"Ripe avocado", qty:"1 large"},
+      {name:"Eggs", qty:"2"},
+      {name:"White vinegar", qty:"1 tbsp"},
+      {name:"Lemon juice", qty:"1 tsp"},
+      {name:"Chili flakes", qty:"pinch"},
+      {name:"Salt & pepper", qty:"to taste"},
+      {name:"Everything bagel seasoning", qty:"optional"},
+    ],
+    steps:[
+      "Toast sourdough slices until golden and crispy.",
+      "Mash avocado with lemon juice, salt, and pepper. Spread generously on toast.",
+      "Bring a small pot of water to a gentle simmer. Add vinegar.",
+      "Crack egg into a small cup. Create a gentle whirlpool in the water and slide the egg in.",
+      "Poach for 3–4 minutes for a runny yolk. Remove with a slotted spoon.",
+      "Place poached egg on avocado toast, sprinkle with chili flakes and optional seasoning.",
+    ]
+  },
+  {
+    id:7, emoji:"🍜", name:"Vegetable Ramen",
+    category:"lunch", tags:["Asian","Vegetarian"],
+    desc:"Umami-rich miso broth loaded with noodles, mushrooms, corn, and a soft-boiled egg.",
+    time:"35 min", servings:2, difficulty:"Medium", calories:420,
+    ingredients:[
+      {name:"Ramen noodles", qty:"200 g"},
+      {name:"Vegetable broth", qty:"4 cups"},
+      {name:"White miso paste", qty:"3 tbsp"},
+      {name:"Shiitake mushrooms, sliced", qty:"100 g"},
+      {name:"Corn kernels", qty:"½ cup"},
+      {name:"Bok choy", qty:"2 heads"},
+      {name:"Eggs", qty:"2"},
+      {name:"Soy sauce", qty:"2 tbsp"},
+      {name:"Sesame oil", qty:"1 tsp"},
+      {name:"Green onions, sliced", qty:"2"},
+      {name:"Nori sheets", qty:"2"},
+    ],
+    steps:[
+      "Soft-boil eggs for 7 minutes, then place in ice water. Peel and set aside.",
+      "Heat vegetable broth in a pot over medium heat. Whisk in miso paste and soy sauce.",
+      "Add mushrooms and corn to the broth. Simmer for 8 minutes.",
+      "Cook ramen noodles per package directions. Drain and divide into bowls.",
+      "Blanch bok choy in the broth for 2 minutes.",
+      "Ladle hot broth over noodles. Top with bok choy, corn, halved eggs, nori, and green onions.",
+      "Drizzle sesame oil over each bowl and serve immediately.",
+    ]
+  },
+  {
+    id:8, emoji:"🍪", name:"Brown Butter Chocolate Chip Cookies",
+    category:"dessert", tags:["Baked","American"],
+    desc:"Crispy edges, chewy centers, and nutty brown butter that takes cookies to another level.",
+    time:"30 min + rest", servings:24, difficulty:"Easy", calories:195,
+    ingredients:[
+      {name:"Unsalted butter", qty:"230 g"},
+      {name:"Brown sugar", qty:"220 g"},
+      {name:"Granulated sugar", qty:"100 g"},
+      {name:"Eggs", qty:"2 large"},
+      {name:"Vanilla extract", qty:"2 tsp"},
+      {name:"All-purpose flour", qty:"280 g"},
+      {name:"Baking soda", qty:"1 tsp"},
+      {name:"Salt", qty:"1 tsp"},
+      {name:"Chocolate chips", qty:"340 g"},
+      {name:"Sea salt flakes", qty:"for topping"},
+    ],
+    steps:[
+      "Brown butter in a saucepan over medium heat until golden and nutty-smelling. Cool for 10 minutes.",
+      "Whisk browned butter with both sugars until combined. Add eggs and vanilla and whisk vigorously.",
+      "Fold in flour, baking soda, and salt until just combined. Stir in chocolate chips.",
+      "Rest dough in fridge for at least 1 hour (or overnight) for best texture.",
+      "Preheat oven to 190°C (375°F). Scoop dough onto lined baking sheets.",
+      "Bake for 10–12 minutes until golden at the edges but still soft in the center.",
+      "Immediately sprinkle with sea salt flakes. Cool on pan for 5 minutes before transferring.",
+    ]
+  },
+];
+
+let currentCategory = 'all';
+let currentSearch = '';
+
+function renderCards(list) {
+  const grid = document.getElementById('recipesGrid');
+  if (!list.length) {
+    grid.innerHTML = `<div class="no-results"><p>🍽️</p><h3>No recipes found</h3><p style="margin-top:.5rem">Try a different search or category</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map((r, i) => `
+    <div class="recipe-card" style="animation-delay:${i*0.06}s" onclick="openModal(${r.id})">
+      <div class="card-emoji">${r.emoji}</div>
+      <div class="card-body">
+        <div class="card-meta">
+          ${r.tags.map((t,i) => `<span class="tag ${i===1?'green':''}">${t}</span>`).join('')}
+        </div>
+        <h3>${r.name}</h3>
+        <p>${r.desc}</p>
+      </div>
+      <div class="card-footer">
+        <span>⏱ ${r.time}</span>
+        <span>👤 ${r.servings} servings</span>
+        <span>🔥 ${r.calories} cal</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterRecipes() {
+  currentSearch = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = RECIPES.filter(r => {
+    const matchCat = currentCategory === 'all' || r.category === currentCategory || r.tags.map(t=>t.toLowerCase()).includes(currentCategory);
+    const matchSearch = !currentSearch || r.name.toLowerCase().includes(currentSearch) || r.desc.toLowerCase().includes(currentSearch) || r.ingredients.some(i=>i.name.toLowerCase().includes(currentSearch));
+    return matchCat && matchSearch;
+  });
+  renderCards(filtered);
+}
+
+function setCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterRecipes();
+}
+
+function openModal(id) {
+  const r = RECIPES.find(x => x.id === id);
+  document.getElementById('modalEmoji').textContent = r.emoji;
+  document.getElementById('modalTitle').textContent = r.name;
+  document.getElementById('modalDesc').textContent = r.desc;
+  document.getElementById('modalStats').innerHTML = `
+    <div class="stat"><span class="stat-val">${r.time}</span><span class="stat-lbl">Cook Time</span></div>
+    <div class="stat"><span class="stat-val">${r.servings}</span><span class="stat-lbl">Servings</span></div>
+    <div class="stat"><span class="stat-val">${r.difficulty}</span><span class="stat-lbl">Difficulty</span></div>
+    <div class="stat"><span class="stat-val">${r.calories}</span><span class="stat-lbl">Calories</span></div>
+  `;
+  document.getElementById('modalIngredients').innerHTML = r.ingredients.map(i=>`
+    <li><span class="ing-name">${i.name}</span><span class="ing-qty">${i.qty}</span></li>
+  `).join('');
+  document.getElementById('modalSteps').innerHTML = r.steps.map((s,i)=>`
+    <li><span class="step-num">${i+1}</span><span>${s}</span></li>
+  `).join('');
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalBtn();
+}
+function closeModalBtn() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeModalBtn(); });
+
+// Init
+renderCards(RECIPES);
+</script>
+</body>
+</html>
